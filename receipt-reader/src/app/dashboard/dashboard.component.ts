@@ -1,4 +1,6 @@
 import { Component, OnInit } from '@angular/core';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+// import { ocrSpaceApi } from 'ocr-space-api';
 
 interface FileReaderEventTarget extends EventTarget {
   result: string;
@@ -19,8 +21,9 @@ export class DashboardComponent implements OnInit {
   url = '';
   selectedFile: File;
   loading = false;
+  result = null;
 
-  constructor() {}
+  constructor(private http: HttpClient) {}
 
   ngOnInit() {}
 
@@ -38,5 +41,43 @@ export class DashboardComponent implements OnInit {
     }
     this.selectedFile = event.target.files[0];
     this.name = event.target.files[0].name;
+  }
+
+  onUpload() {
+    console.log('uploading...');
+    if (this.selectedFile && this.name) {
+      const base64Image = this.url;
+      const data =
+        encodeURIComponent('base64Image') +
+        '=' +
+        encodeURIComponent(base64Image) +
+        '&' +
+        encodeURIComponent('isTable') +
+        '=' +
+        encodeURIComponent('true');
+
+      this.http
+        .post('https://api.ocr.space/parse/image', data, {
+          headers: new HttpHeaders()
+            .set('Content-Type', 'application/x-www-form-urlencoded')
+            .set('apikey', 'e32e197b2488957')
+        })
+        .subscribe(res => {
+          console.log(res);
+          this.result = res.ParsedResults[0].ParsedText;
+          console.log(this.result);
+        });
+
+      //   this.imageApi
+      //     .parseImageFromLocalFile(this.url, options)
+      //     .then(function(parsedResult) {
+      //       console.log('parsedText: \n', parsedResult.parsedText);
+      //       console.log('ocrParsedResult: \n', parsedResult.ocrParsedResult);
+      //     })
+      //     .catch(function(err) {
+      //       console.log('ERROR:', err);
+      //     });
+      //   // this.http.post();
+    }
   }
 }

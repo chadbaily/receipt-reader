@@ -14,7 +14,14 @@
     >
   </div>
   <div class="input-group-append">
-    <span class="input-group-text" id="inputGroupFileAddon">Upload</span>
+    <button
+      class="btn btn-primary"
+      type="button"
+      id="inputGroupFileAddon"
+      (click)="onUpload()"
+    >
+      Upload
+    </button>
   </div>
 </div>
 <p *ngIf="name">Selected File: {{ name }}</p>
