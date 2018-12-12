@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { DataAccessService } from '../data-access.service';
+import { Router } from '@angular/router';
 // import { ocrSpaceApi } from 'ocr-space-api';
 
 interface FileReaderEventTarget extends EventTarget {
@@ -34,7 +35,8 @@ export class DashboardComponent implements OnInit {
 
   constructor(
     private http: HttpClient,
-    private dataAccess: DataAccessService
+    private dataAccess: DataAccessService,
+    private router: Router
   ) {}
 
   ngOnInit() {}
@@ -82,6 +84,7 @@ export class DashboardComponent implements OnInit {
           this.determineTotal(regexMatch);
           this.dataAccess.imageData$.next({ url: this.url, total: this.total });
           if (this.total) {
+            this.router.navigateByUrl('/confirm');
           }
           console.log(this.dataAccess.imageData$.getValue());
         });
