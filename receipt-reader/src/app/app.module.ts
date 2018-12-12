@@ -7,9 +7,10 @@ import { AppComponent } from './app.component';
 import { AppRoutingModule } from './/app-routing.module';
 import { DashboardComponent } from './dashboard/dashboard.component';
 import { RouterModule, Router } from '@angular/router';
+import { ConfirmComponent } from './confirm/confirm.component';
 
 @NgModule({
-  declarations: [AppComponent, DashboardComponent],
+  declarations: [AppComponent, DashboardComponent, ConfirmComponent],
   imports: [
     BrowserModule,
     AppRoutingModule,

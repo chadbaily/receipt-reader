@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { DataAccessService } from '../data-access.service';
 // import { ocrSpaceApi } from 'ocr-space-api';
 
 interface FileReaderEventTarget extends EventTarget {
@@ -11,10 +12,16 @@ interface FileReaderEvent extends Event {
   getMessage(): string;
 }
 
+interface ParsedResultsOBJ {
+  ParsedText: string;
+}
+
+interface OCRParsedResult extends Object {
+  ParsedResults: Array<ParsedResultsOBJ>;
+}
 @Component({
   selector: 'app-dashboard',
-  templateUrl: './dashboard.component.html',
-  styleUrls: ['./dashboard.component.css']
+  templateUrl: './dashboard.component.html'
 })
 export class DashboardComponent implements OnInit {
   name = null;
@@ -22,8 +29,13 @@ export class DashboardComponent implements OnInit {
   selectedFile: File;
   loading = false;
   result = null;
+  private regex: RegExp = /(\w+|\w+\:)\s*((\d+.\d+)|(\$\d+.\d+))/g;
+  public total = null;
 
-  constructor(private http: HttpClient) {}
+  constructor(
+    private http: HttpClient,
+    private dataAccess: DataAccessService
+  ) {}
 
   ngOnInit() {}
 
@@ -62,22 +74,33 @@ export class DashboardComponent implements OnInit {
             .set('Content-Type', 'application/x-www-form-urlencoded')
             .set('apikey', 'e32e197b2488957')
         })
-        .subscribe(res => {
-          console.log(res);
+        .subscribe((res: OCRParsedResult) => {
+          // console.log(res);
           this.result = res.ParsedResults[0].ParsedText;
-          console.log(this.result);
+          const regexMatch = this.result.match(this.regex);
+          // console.log(this.result);
+          this.determineTotal(regexMatch);
+          this.dataAccess.imageData$.next({ url: this.url, total: this.total });
+          if (this.total) {
+          }
+          console.log(this.dataAccess.imageData$.getValue());
         });
-
-      //   this.imageApi
-      //     .parseImageFromLocalFile(this.url, options)
-      //     .then(function(parsedResult) {
-      //       console.log('parsedText: \n', parsedResult.parsedText);
-      //       console.log('ocrParsedResult: \n', parsedResult.ocrParsedResult);
-      //     })
-      //     .catch(function(err) {
-      //       console.log('ERROR:', err);
-      //     });
-      //   // this.http.post();
     }
+  }
+
+  private determineTotal(matches: string[]) {
+    for (let i = 0; i < matches.length; i++) {
+      const splits = matches[i].split(' ');
+      if (splits.length === 2) {
+        if (
+          splits[0].toUpperCase() === 'TOTAL' ||
+          splits[0].toUpperCase() === 'BALANCE'
+        ) {
+          this.total = +splits[1];
+          return;
+        }
+      }
+    }
+    return null;
   }
 }
